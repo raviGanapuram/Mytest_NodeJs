@@ -1,60 +1,38 @@
-const express = require('express');
-const path = require('path');
-const favicon = require('serve-favicon');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
+var express = require('express');
+var app = express();
+global.__root   = __dirname + '/'; 
 
-const routes = require('./server/routes/index');
-// var users = require('./routes/users');
-
-const app = express();
-
-// view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'html');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'client')));
-
-app.use('/', routes);
-// app.use('/users', users);
-
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+app.get('/api', function (req, res) {
+  res.status(200).send('API works.');
 });
 
-// error handlers
+app.use(function (req, res, next) {
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use((err, req, res, next) => {
-    res.status(err.status || 500);
-    res.json({
-      message: err.message,
-      error: err
-    });
-  });
-}
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-// production error handler
-// no stacktraces leaked to user
-app.use((err, req, res, next) => {
-  res.status(err.status || 500);
-  res.json({
-    message: err.message,
-    error: {}
-  });
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,x-xsrf-token,access-token');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  // Pass to next layer of middleware
+  next();
 });
 
+var AuthController = require(__root + 'auth/AuthController');
+app.use('/api/auth', AuthController);
+
+var LanguageController = require(__root + 'controller/LanguageController');
+app.use('/api/language', LanguageController);
+
+var LessonController = require(__root + 'controller/LessonController');
+app.use('/api/lesson', LessonController);
+
+var ExampleController = require(__root + 'controller/ExampleController');
+app.use('/api/example', ExampleController);
 
 module.exports = app;
